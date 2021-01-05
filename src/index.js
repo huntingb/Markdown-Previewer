@@ -1,10 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import marked from 'marked';
+import DOMPurify from 'dompurify';
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+import 'highlight.js/styles/github.css';
 import './index.css';
+
+hljs.registerLanguage('javascript', javascript);
 
 marked.setOptions({
   breaks: true,
+  highlight: function(code) {
+    return hljs.highlightAuto(code).value;
+  },
 });
 
 function Editor(props) {
@@ -12,17 +21,20 @@ function Editor(props) {
     <div id="editor-container" className="white-box">
       <h1>Editor</h1>
       <hr/>
-      <textarea value={props.text} onChange={props.handleChange} />
+      <textarea id="editor" value={props.text} onChange={props.handleChange} />
     </div>
   );
 }
 
 function Preview(props) {
+  let dirty = marked(props.text);
+  let clean = DOMPurify.sanitize(dirty);
+
   return (
     <div id="preview-container" className="white-box">
       <h1>Preview</h1>
       <hr/>
-      <div dangerouslySetInnerHTML={{__html: marked(props.text)}} />
+      <div id="preview" dangerouslySetInnerHTML={{__html: clean}} />
     </div>
   );
 }
